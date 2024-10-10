@@ -1,0 +1,64 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model TxLink {
+  id                String                @id @default(uuid()) @db.Uuid
+  hash              String
+  shortHash         String?
+  chainId           Int
+  userTgId          String
+  createdAt         DateTime              @default(now())
+  
+  // Связь с ReferralTxCounter
+  referralCounters  ReferralTxCounter[]   @relation("ReferralTxCounterTxLink")
+}
+
+
+model AddrLink {
+  id                String                @id @default(uuid()) @db.Uuid
+  hash              String
+  shortHash         String?
+  chainId           Int
+  userTgId          String
+  createdAt         DateTime              @default(now())
+  
+  // Связь с ReferralAddrCounter
+  referralCounters  ReferralAddrCounter[] @relation("ReferralAddrCounterAddrLink")
+}
+
+
+model ReferralTxCounter {
+  id          String   @id @default(uuid()) @db.Uuid
+  linkId      String   @db.Uuid
+  chainId     Int
+  referralId  String
+  createdAt   DateTime @default(now())
+
+  // Связь с TxLink
+  txLink      TxLink   @relation("ReferralTxCounterTxLink", fields: [linkId], references: [id], map: "txLink_fk")
+}
+
+
+model ReferralAddrCounter {
+  id          String   @id @default(uuid()) @db.Uuid
+  linkId      String   @db.Uuid
+  chainId     Int
+  referralId  String
+  createdAt   DateTime @default(now())
+
+  // Связь с AddrLink
+  addrLink    AddrLink @relation("ReferralAddrCounterAddrLink", fields: [linkId], references: [id], map: "addrLink_fk")
+}
+
+model UserIds {
+  id              String   @id @default(uuid()) @db.Uuid
+  telegramUserId  String
+}
+
+
